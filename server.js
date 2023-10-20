@@ -1,19 +1,19 @@
 /**
  * Calculates and displays a EV route from 
  * defined points in India.
- *
  * A full list of available request parameters can be found in the Routing API documentation.
  * see: http://developer.here.com/rest-apis/documentation/routing/topics/resource-calculate-route.html
- *
  * @param {H.service.Platform} platform A stub class to access HERE services
  */
+//const fs = require('fs');
+var distanceString,durationString,chargingDurationString,stopsString;
 function calculateRouteFromAtoB(platform, origin, destination, initialCharge) {
   var router = platform.getRoutingService(null, 8),
       routeRequestParams = {
       'transportMode': 'car',
-      'origin':'37.2333253,-121.6846349', //Santa Clara
+     'origin':'12.9767936,77.590082', //bangalore
       //'origin': origin,
-      'destination': '33.7690164,-118.191604', //Long Beach
+     'destination': '28.6273928,77.1716954', //delhi
       //'destination': destination,
       'return': 'polyline,turnByTurnActions,actions,instructions,travelSummary', 
       'ev[freeFlowSpeedTable]':'0,0.239,27,0.239,45,0.259,60,0.196,75,0.207,90,0.238,100,0.26,110,0.296,120,0.337,130,0.351,250,0.351',
@@ -297,7 +297,7 @@ var carTypeIndex = 0;
 // Step 1: initialize communication with the platform
 // In your own code, replace variable window.apikey with your own apikey
 var platform = new H.service.Platform({
-  apikey: ''
+  apikey: 'Yqto0OWdVQ1lN4JyZSUwbyw5gH_EpEWlflfn_-Oe3lI'
 });
 
 var defaultLayers = platform.createDefaultLayers();
@@ -382,8 +382,8 @@ function addManueversToMap(route) {
     j;
   //adding departing marker
     var dotMarker = new H.map.Marker({
-      lat: 37.2333253,
-      lng: -121.6846349},
+      lat: 12.9767936,
+      lng: 77.590082},
       {icon: dotIcon});
       dotMarker.instruction = "Departing from Start Location";
       group.addObject(dotMarker);
@@ -487,7 +487,7 @@ function createUIforDropdown() {
   var space2 = document.createElement('p');
   directionTitleContainer.appendChild(space2);
   
-  for (var i = 5; i < 11; i++){
+  for (var i = 10; i < 11; i++){
     var option = document.createElement("option");
     option.value = i;
     option.text = i*10;
@@ -512,7 +512,7 @@ function createUIforDropdown() {
   document.getElementById("evInitialCharge").onchange = eventEvInitialCharge;
   
 }
-
+//const fs = require('fs');
 /**
  * Creates a series of H.map.Marker points from the route and adds them to the map.
  * @param {Object} route A route as received from the H.service.RoutingService
@@ -525,7 +525,7 @@ function addSummaryToPanel(route) {
 
   let duration = 0,
   chargingDuration = 0,
-    distance = 0;
+    distance = 0,stops=0;
 
   route.sections.forEach((section, index, theArray) => {
     distance += section.travelSummary.length;
@@ -533,19 +533,28 @@ function addSummaryToPanel(route) {
     //adding charging time 
     if (index < theArray.length -1) {
       chargingDuration += section.postActions[0].duration + section.postActions[1].duration;
-      duration += section.postActions[0].duration + section.postActions[1].duration;}
+      duration += section.postActions[0].duration + section.postActions[1].duration;
+    stops+=1}
   });
 
   var summaryDiv = document.createElement('div'),
     content = '<b>Total distance</b>: ' + (distance/1000).toFixed(2) + ' km. <br />' +
     '<b>Charging Time</b>: ' + toHHMMSS(chargingDuration) + '<br />' +
-      '<b>Travel Time</b>: ' + toHHMMSS(duration) + ' (in current traffic)';
-
+      '<b>Travel Time</b>: ' + toHHMMSS(duration) + ' (in current traffic)'+stops;
+      
+  distanceString = (distance).toFixed(2).toString();
+  durationString = duration.toString();
+  chargingDurationString = chargingDuration.toString();
+  stopsString = stops.toString();
+  console.log(distanceString+' '+durationString+' '+chargingDurationString+' '+stopsString)
   summaryDiv.style.fontSize = 'small';
   summaryDiv.style.marginLeft = '5%';
   summaryDiv.style.marginRight = '5%';
   summaryDiv.innerHTML = content;
   routeInstructionsContainer.appendChild(summaryDiv);
+  summaryDiv.setAttribute('id', 'myinfo');
+  
+  
 }
 
 /**
@@ -602,5 +611,13 @@ function toHHMMSS(duration) {
   return Math.floor(duration / 3600) + ' hours ' + Math.floor(duration % 3600 /60) + ' minutes ' + (duration % 60) + ' seconds.';
 }
 
+
 calculateRouteFromAtoB(platform, "12.97708,77.596173", "12.9352,77.6245", 50);
 createUIforDropdown();
+/*
+const fs = require('fs');
+fs.appendFile('data.csv', `${distanceString}, ${durationString}, ${chargingDurationString}, ${stopsString}\n`, (err) => {
+  if (err) throw err;
+  console.log('Data appended to data.csv');
+});
+*/

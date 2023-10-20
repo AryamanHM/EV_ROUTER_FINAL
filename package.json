@@ -1,0 +1,16 @@
+{
+  "name": "ev_router_final",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "node app.js"
+  },
+  "author": "Aryaman Mishra",
+  "license": "ISC",
+  "keywords": [],
+  "description": "",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
